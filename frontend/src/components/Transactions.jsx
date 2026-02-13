@@ -15,30 +15,36 @@ const Transactions = ({ account, onRefresh }) => {
 
   const { formatCurrency } = useCurrency();
 
-  useEffect(() => {
-    if (account) {
-      fetchTransactions();
-    }
-  }, [account, fetchTransactions]);
 
   const fetchTransactions = useCallback(async () => {
+    if (!account) return;
+
     try {
       const response = await transactionAPI.getAccountTransactions(account.id);
       setTransactions(response.data);
     } catch (error) {
       console.error('Erreur chargement transactions:', error);
     }
-  }, [account.id]);
+  }, [account]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
 
   const handleDeposit = async (e) => {
     e.preventDefault();
     try {
-      await accountAPI.deposit(account.id, parseFloat(amount));
+      await transactionAPI.createTransaction({
+        from_account_id: account.id,
+        to_account_id: account.id,
+        amount: parseFloat(amount),
+        transaction_type: 'deposit',
+        description: 'Dépôt'
+      });
       toast.success('Dépôt effectué avec succès !');
       setShowDepositModal(false);
       setAmount('');
       onRefresh();
-      fetchTransactions();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors du dépôt');
     }
@@ -47,12 +53,17 @@ const Transactions = ({ account, onRefresh }) => {
   const handleWithdraw = async (e) => {
     e.preventDefault();
     try {
-      await accountAPI.withdraw(account.id, parseFloat(amount));
+      await transactionAPI.createTransaction({
+        from_account_id: account.id,
+        to_account_id: account.id,
+        amount: parseFloat(amount),
+        transaction_type: 'withdraw',
+        description: 'Retrait'
+      });
       toast.success('Retrait effectué avec succès !');
       setShowWithdrawModal(false);
       setAmount('');
       onRefresh();
-      fetchTransactions();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors du retrait');
     }
@@ -61,13 +72,18 @@ const Transactions = ({ account, onRefresh }) => {
   const handleTransfer = async (e) => {
     e.preventDefault();
     try {
-      await accountAPI.transfer(account.id, parseInt(toAccountId), parseFloat(amount));
+      await transactionAPI.createTransaction({
+        from_account_id: account.id,
+        to_account_id: toAccountId,
+        amount: parseFloat(amount),
+        transaction_type: 'transfer',
+        description: 'Virement'
+      });
       toast.success('Virement effectué avec succès !');
       setShowTransferModal(false);
       setAmount('');
       setToAccountId('');
       onRefresh();
-      fetchTransactions();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors du virement');
     }
@@ -144,29 +160,27 @@ const Transactions = ({ account, onRefresh }) => {
         )}
       </div>
 
-      {/* Modal Dépôt */}
       {showDepositModal && (
         <div className="modal-overlay" onClick={() => setShowDepositModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3><Download size={24} /> Effectuer un dépôt</h3>
+            <h3><Download size={24} /> Déposer de l'argent</h3>
             <form onSubmit={handleDeposit}>
               <div className="form-group">
-                <label>Montant ({account.currency || '€'})</label>
+                <label>Montant (€)</label>
                 <input
                   type="number"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  min="0.01"
+                  min="0"
                   step="0.01"
                   required
-                  autoFocus
                 />
               </div>
               <div className="modal-buttons">
                 <button type="button" className="cancel-btn" onClick={() => setShowDepositModal(false)}>
                   Annuler
                 </button>
-                <button type="submit" className="confirm-btn deposit">
+                <button type="submit" className="confirm-btn">
                   Déposer
                 </button>
               </div>
@@ -175,33 +189,27 @@ const Transactions = ({ account, onRefresh }) => {
         </div>
       )}
 
-      {/* Modal Retrait */}
       {showWithdrawModal && (
         <div className="modal-overlay" onClick={() => setShowWithdrawModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3><Upload size={24} /> Effectuer un retrait</h3>
+            <h3><Upload size={24} /> Retirer de l'argent</h3>
             <form onSubmit={handleWithdraw}>
               <div className="form-group">
-                <label>Montant ({account.currency || '€'})</label>
+                <label>Montant (€)</label>
                 <input
                   type="number"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  min="0.01"
+                  min="0"
                   step="0.01"
-                  max={account.balance + account.overdraft_limit}
                   required
-                  autoFocus
                 />
-              </div>
-              <div className="modal-info">
-                Solde disponible: {formatCurrency(account.balance + account.overdraft_limit)}
               </div>
               <div className="modal-buttons">
                 <button type="button" className="cancel-btn" onClick={() => setShowWithdrawModal(false)}>
                   Annuler
                 </button>
-                <button type="submit" className="confirm-btn withdraw">
+                <button type="submit" className="confirm-btn">
                   Retirer
                 </button>
               </div>
@@ -210,42 +218,43 @@ const Transactions = ({ account, onRefresh }) => {
         </div>
       )}
 
-      {/* Modal Virement */}
       {showTransferModal && (
         <div className="modal-overlay" onClick={() => setShowTransferModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3><ArrowLeftRight size={24} /> Effectuer un virement</h3>
             <form onSubmit={handleTransfer}>
               <div className="form-group">
-                <label>Compte destinataire (ID)</label>
-                <input
-                  type="number"
-                  value={toAccountId}
-                  onChange={(e) => setToAccountId(e.target.value)}
-                  required
-                  placeholder="Ex: 2"
-                />
-              </div>
-              <div className="form-group">
-                <label>Montant ({account.currency || '€'})</label>
+                <label>Montant (€)</label>
                 <input
                   type="number"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  min="0.01"
+                  min="0"
                   step="0.01"
                   required
                 />
               </div>
-              <div className="modal-info">
-                Solde disponible: {formatCurrency(account.balance + account.overdraft_limit)}
+              <div className="form-group">
+                <label>Compte destinataire</label>
+                <select
+                  value={toAccountId}
+                  onChange={(e) => setToAccountId(e.target.value)}
+                  required
+                >
+                  <option value="">Sélectionnez un compte</option>
+                  {accountAPI.getUserAccounts().then(accounts => accounts.data.filter(a => a.id !== account.id).map(a => (
+                    <option key={a.id} value={a.id}>
+                      {a.account_number} - {a.account_type === 'checking' ? 'Courant' : 'Épargne'}
+                    </option>
+                  )))}
+                </select>
               </div>
               <div className="modal-buttons">
                 <button type="button" className="cancel-btn" onClick={() => setShowTransferModal(false)}>
                   Annuler
                 </button>
-                <button type="submit" className="confirm-btn transfer">
-                  Transférer
+                <button type="submit" className="confirm-btn">
+                  Virement
                 </button>
               </div>
             </form>

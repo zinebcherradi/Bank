@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react'; 
 import { useAuth } from '../context/AuthContext';
 import { accountAPI } from '../services/api';
 import { toast } from 'react-toastify';
@@ -11,10 +11,6 @@ const Dashboard = () => {
   const [accounts, setAccounts] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchAccounts();
-  }, [fetchAccounts]);
 
   const fetchAccounts = useCallback(async () => {
     if (!user) return;
@@ -30,7 +26,11 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, selectedAccount]);
+  }, [user, selectedAccount]); 
+
+  useEffect(() => {
+    fetchAccounts();
+  }, [fetchAccounts]);
 
   if (loading) {
     return <div className="loading">Chargement...</div>;

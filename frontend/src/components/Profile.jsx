@@ -9,6 +9,7 @@ const Profile = () => {
         return <div className="loading">Chargement...</div>;
     }
 
+
     return (
         <div className="profile-container">
             <div className="profile-header">
