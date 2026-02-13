@@ -12,5 +12,5 @@
       "dest": "backend/main.py"
     }
   ],
-  "installCommand": "pip install -r backend/requirements.txt"
+  "installCommand": "uv pip install -r requirements.txt"
 }
