@@ -1,0 +1,38 @@
+# render.yaml
+services:
+  - type: web
+    name: horizon-bank-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DB_USER
+        fromDatabase:
+          name: horizon-bank-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: horizon-bank-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: horizon-bank-db
+          property: database
+      - key: DB_HOST
+        fromDatabase:
+          name: horizon-bank-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: horizon-bank-db
+          property: port
+
+databases:
+  - name: horizon-bank-db
+    databaseName: db_bank
+    user: root
+    plan: free
