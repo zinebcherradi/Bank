@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select
 from entities import User, Account, Transaction
 from typing import List, Optional
+
 
 class UserDao:
     @staticmethod
@@ -17,15 +19,21 @@ class UserDao:
 
     @staticmethod
     def search_by_email(session: Session, email: str) -> Optional[User]:
-        return session.query(User).filter(User.email == email).first()
+        stmt = select(User).where(User.email == email)
+        result = session.execute(stmt)
+        return result.scalar_one_or_none()
 
     @staticmethod
     def get_by_id(session: Session, user_id: int) -> Optional[User]:
-        return session.query(User).filter(User.id == user_id).first()
+        stmt = select(User).where(User.id == user_id)
+        result = session.execute(stmt)
+        return result.scalar_one_or_none()
 
     @staticmethod
     def delete_user(session: Session, email: str) -> bool:
-        user = session.query(User).filter(User.email == email).first()
+        stmt = select(User).where(User.email == email)
+        result = session.execute(stmt)
+        user = result.scalar_one_or_none()
         if user:
             session.delete(user)
             session.commit()
@@ -34,7 +42,9 @@ class UserDao:
 
     @staticmethod
     def get_all_users(session: Session) -> List[User]:
-        return session.query(User).all()
+        stmt = select(User)
+        result = session.execute(stmt)
+        return list(result.scalars())
 
 
 class AccountDao:
@@ -47,15 +57,21 @@ class AccountDao:
 
     @staticmethod
     def get_by_id(session: Session, account_id: int) -> Optional[Account]:
-        return session.query(Account).filter(Account.id == account_id).first()
+        stmt = select(Account).where(Account.id == account_id)
+        result = session.execute(stmt)
+        return result.scalar_one_or_none()
 
     @staticmethod
     def get_by_user_id(session: Session, user_id: int) -> List[Account]:
-        return session.query(Account).filter(Account.user_id == user_id).all()
+        stmt = select(Account).where(Account.user_id == user_id)
+        result = session.execute(stmt)
+        return list(result.scalars())
 
     @staticmethod
     def delete_account(session: Session, account_id: int) -> bool:
-        account = session.query(Account).filter(Account.id == account_id).first()
+        stmt = select(Account).where(Account.id == account_id)
+        result = session.execute(stmt)
+        account = result.scalar_one_or_none()
         if account:
             session.delete(account)
             session.commit()
@@ -64,7 +80,9 @@ class AccountDao:
 
     @staticmethod
     def update_balance(session: Session, account_id: int, new_balance: float) -> bool:
-        account = session.query(Account).filter(Account.id == account_id).first()
+        stmt = select(Account).where(Account.id == account_id)
+        result = session.execute(stmt)
+        account = result.scalar_one_or_none()
         if account:
             account.balance = new_balance
             session.commit()
@@ -82,16 +100,24 @@ class TransactionDao:
 
     @staticmethod
     def get_by_id(session: Session, transaction_id: int) -> Optional[Transaction]:
-        return session.query(Transaction).filter(Transaction.id == transaction_id).first()
+        stmt = select(Transaction).where(Transaction.id == transaction_id)
+        result = session.execute(stmt)
+        return result.scalar_one_or_none()
 
     @staticmethod
     def get_by_account_id(session: Session, account_id: int) -> List[Transaction]:
-        return session.query(Transaction).filter(Transaction.account_id == account_id).all()
+        stmt = select(Transaction).where(Transaction.account_id == account_id)
+        result = session.execute(stmt)
+        return list(result.scalars())
 
     @staticmethod
-    def get_by_account_id_and_date_range(session: Session, account_id: int, start_date, end_date) -> List[Transaction]:
-        return session.query(Transaction).filter(
+    def get_by_account_id_and_date_range(
+        session: Session, account_id: int, start_date, end_date
+    ) -> List[Transaction]:
+        stmt = select(Transaction).where(
             Transaction.account_id == account_id,
             Transaction.created_at >= start_date,
             Transaction.created_at <= end_date
-        ).all()
+        )
+        result = session.execute(stmt)
+        return list(result.scalars())
