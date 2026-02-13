@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { accountAPI, transactionAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import { useCurrency } from '../context/CurrencyContext';
@@ -19,16 +19,16 @@ const Transactions = ({ account, onRefresh }) => {
     if (account) {
       fetchTransactions();
     }
-  }, [account]);
+  }, [account, fetchTransactions]);
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     try {
       const response = await transactionAPI.getAccountTransactions(account.id);
       setTransactions(response.data);
     } catch (error) {
       console.error('Erreur chargement transactions:', error);
     }
-  };
+  }, [account.id]);
 
   const handleDeposit = async (e) => {
     e.preventDefault();

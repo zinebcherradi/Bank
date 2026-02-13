@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { accountAPI } from '../services/api';
 import { toast } from 'react-toastify';
@@ -14,11 +14,11 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchAccounts();
-  }, [user]);
+  }, [fetchAccounts]);
 
-  const fetchAccounts = async () => {
+  const fetchAccounts = useCallback(async () => {
     if (!user) return;
-    
+
     try {
       const response = await accountAPI.getUserAccounts(user.id);
       setAccounts(response.data);
@@ -30,7 +30,7 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, selectedAccount]);
 
   if (loading) {
     return <div className="loading">Chargement...</div>;
@@ -42,20 +42,20 @@ const Dashboard = () => {
         <h1>Tableau de bord</h1>
         <p>Bienvenue, {user?.first_name || user?.email}</p>
       </div>
-      
+
       <div className="dashboard-grid">
         <div className="accounts-section">
-          <Accounts 
-            accounts={accounts} 
+          <Accounts
+            accounts={accounts}
             onAccountSelect={setSelectedAccount}
             selectedAccount={selectedAccount}
             onRefresh={fetchAccounts}
           />
         </div>
-        
+
         <div className="transactions-section">
           {selectedAccount ? (
-            <Transactions 
+            <Transactions
               account={selectedAccount}
               onRefresh={fetchAccounts}
             />

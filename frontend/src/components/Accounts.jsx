@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { accountAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import { useCurrency } from '../context/CurrencyContext';
-import { CreditCard, Wallet, CheckCircle, XCircle } from 'lucide-react';
+import { CreditCard, Wallet } from 'lucide-react';
 import './Accounts.css';
 
 const Accounts = ({ accounts, onAccountSelect, selectedAccount, onRefresh }) => {

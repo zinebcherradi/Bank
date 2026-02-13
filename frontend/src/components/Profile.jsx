@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import './Profile.css';
 
 const Profile = () => {
     const { user } = useAuth();
-    const [isEditing, setIsEditing] = useState(false);
 
     if (!user) {
         return <div className="loading">Chargement...</div>;
