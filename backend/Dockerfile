@@ -2,10 +2,13 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
+# ✅ Correction : Copie requirements.txt depuis backend/
+COPY backend/requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# ✅ Correction : Copie tout le dossier backend/
+COPY backend/ .
 
 EXPOSE 8000
 
