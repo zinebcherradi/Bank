@@ -11,6 +11,5 @@
       "src": "/(.*)",
       "dest": "main.py"
     }
-  ],
-  "installCommand": "pip install --break-system-packages -r requirements.txt"
+  ]
 }
