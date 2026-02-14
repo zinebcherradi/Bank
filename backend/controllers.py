@@ -176,11 +176,9 @@ def withdraw(account_id: int, amount: float, current_user_id: int = Depends(get_
     raise HTTPException(status_code=400, detail="Fonds insuffisants ou montant invalide")
 
 @router_accounts.post("/{account_id}/transfer")
-def transfer(account_id: int, to_account_id: int, amount: float, current_user_id: int = Depends(get_current_user_id)):
+def transfer(account_id: int, to_account_number: str, amount: float, current_user_id: int = Depends(get_current_user_id)):
     if amount <= 0:
         raise HTTPException(status_code=400, detail="Montant invalide")
-    if account_id == to_account_id:
-        raise HTTPException(status_code=400, detail="Impossible de transférer vers le même compte")
     account_service = AccountService()
     from_account = account_service.get_account_by_id(account_id)
     if not from_account:
@@ -189,9 +187,9 @@ def transfer(account_id: int, to_account_id: int, amount: float, current_user_id
     current_user = user_service.get_by_id(current_user_id)
     if not current_user or current_user.id != from_account.user_id:
         raise HTTPException(status_code=403, detail="Accès refusé")
-    if account_service.transfer(account_id, to_account_id, amount):
-        return Response(content=f"Virement de {amount} vers le compte {to_account_id} effectué avec succès", status_code=200)
-    raise HTTPException(status_code=400, detail="Échec du virement")
+    if account_service.transfer(account_id, to_account_number, amount):
+        return Response(content=f"Virement de {amount} vers le compte {to_account_number} effectué avec succès", status_code=200)
+    raise HTTPException(status_code=400, detail="Échec du virement : compte destinataire introuvable ou solde insuffisant")
 
 @router_transactions.get("/account/{account_id}", response_model=List[TransactionResponse])
 def get_transactions_by_account(account_id: int, current_user_id: int = Depends(get_current_user_id)):

@@ -40,6 +40,7 @@ class Account(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('t_users.id'), nullable=False)
+    account_number = Column(String(20), unique=True, index=True, nullable=False)
     account_type = Column(String(20), nullable=False)
     balance = Column(Float, default=0.0)
     overdraft_limit = Column(Float, default=0.0)
@@ -52,12 +53,14 @@ class Account(Base):
     def __init__(
         self,
         user_id: int,
+        account_number: str,
         account_type: str,
         balance: float = 0.0,
         overdraft_limit: float = 0.0,
         interest_rate: float = 0.0
     ):
         self.user_id = user_id
+        self.account_number = account_number
         self.account_type = account_type
         self.balance = balance
         self.overdraft_limit = overdraft_limit

@@ -62,6 +62,12 @@ class AccountDao:
         return result.scalar_one_or_none()
 
     @staticmethod
+    def get_by_account_number(session: Session, account_number: str) -> Optional[Account]:
+        stmt = select(Account).where(Account.account_number == account_number)
+        result = session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
     def get_by_user_id(session: Session, user_id: int) -> List[Account]:
         stmt = select(Account).where(Account.user_id == user_id)
         result = session.execute(stmt)
@@ -85,7 +91,6 @@ class AccountDao:
         account = result.scalar_one_or_none()
         if account:
             account.balance = new_balance
-            session.commit()
             return True
         return False
 
@@ -94,8 +99,6 @@ class TransactionDao:
     @staticmethod
     def create_transaction(session: Session, transaction: Transaction) -> Transaction:
         session.add(transaction)
-        session.commit()
-        session.refresh(transaction)
         return transaction
 
     @staticmethod

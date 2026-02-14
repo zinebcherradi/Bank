@@ -24,6 +24,7 @@ class UserResponse(BaseModel):
 
 class AccountRequest(BaseModel):
     user_id: int
+    account_number: Optional[str] = None
     account_type: str
     overdraft_limit: float = 0.0
     interest_rate: float = 0.0
@@ -31,6 +32,7 @@ class AccountRequest(BaseModel):
 class AccountResponse(BaseModel):
     id: int
     user_id: int
+    account_number: str
     account_type: str
     balance: float
     overdraft_limit: float

@@ -11,7 +11,7 @@ const Transactions = ({ account, onRefresh }) => {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [amount, setAmount] = useState('');
-  const [toAccountId, setToAccountId] = useState('');
+  const [toAccountNumber, setToAccountNumber] = useState('');
 
   const { formatCurrency } = useCurrency();
 
@@ -25,7 +25,11 @@ const Transactions = ({ account, onRefresh }) => {
     } catch (error) {
       console.error('Erreur chargement transactions:', error);
     }
-  }, [account]);
+  }, [account?.id]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
 
   useEffect(() => {
     fetchTransactions();
@@ -34,17 +38,12 @@ const Transactions = ({ account, onRefresh }) => {
   const handleDeposit = async (e) => {
     e.preventDefault();
     try {
-      await transactionAPI.createTransaction({
-        from_account_id: account.id,
-        to_account_id: account.id,
-        amount: parseFloat(amount),
-        transaction_type: 'deposit',
-        description: 'Dépôt'
-      });
+      await accountAPI.deposit(account.id, parseFloat(amount));
       toast.success('Dépôt effectué avec succès !');
       setShowDepositModal(false);
       setAmount('');
       onRefresh();
+      fetchTransactions();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors du dépôt');
     }
@@ -53,17 +52,12 @@ const Transactions = ({ account, onRefresh }) => {
   const handleWithdraw = async (e) => {
     e.preventDefault();
     try {
-      await transactionAPI.createTransaction({
-        from_account_id: account.id,
-        to_account_id: account.id,
-        amount: parseFloat(amount),
-        transaction_type: 'withdraw',
-        description: 'Retrait'
-      });
+      await accountAPI.withdraw(account.id, parseFloat(amount));
       toast.success('Retrait effectué avec succès !');
       setShowWithdrawModal(false);
       setAmount('');
       onRefresh();
+      fetchTransactions();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors du retrait');
     }
@@ -72,18 +66,13 @@ const Transactions = ({ account, onRefresh }) => {
   const handleTransfer = async (e) => {
     e.preventDefault();
     try {
-      await transactionAPI.createTransaction({
-        from_account_id: account.id,
-        to_account_id: toAccountId,
-        amount: parseFloat(amount),
-        transaction_type: 'transfer',
-        description: 'Virement'
-      });
+      await accountAPI.transfer(account.id, toAccountNumber, parseFloat(amount));
       toast.success('Virement effectué avec succès !');
       setShowTransferModal(false);
       setAmount('');
-      setToAccountId('');
+      setToAccountNumber('');
       onRefresh();
+      fetchTransactions();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors du virement');
     }
@@ -235,19 +224,14 @@ const Transactions = ({ account, onRefresh }) => {
                 />
               </div>
               <div className="form-group">
-                <label>Compte destinataire</label>
-                <select
-                  value={toAccountId}
-                  onChange={(e) => setToAccountId(e.target.value)}
+                <label>Numéro de compte destinataire</label>
+                <input
+                  type="text"
+                  placeholder="Ex: 1234567890"
+                  value={toAccountNumber}
+                  onChange={(e) => setToAccountNumber(e.target.value)}
                   required
-                >
-                  <option value="">Sélectionnez un compte</option>
-                  {accountAPI.getUserAccounts().then(accounts => accounts.data.filter(a => a.id !== account.id).map(a => (
-                    <option key={a.id} value={a.id}>
-                      {a.account_number} - {a.account_type === 'checking' ? 'Courant' : 'Épargne'}
-                    </option>
-                  )))}
-                </select>
+                />
               </div>
               <div className="modal-buttons">
                 <button type="button" className="cancel-btn" onClick={() => setShowTransferModal(false)}>

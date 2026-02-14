@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'; 
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { accountAPI } from '../services/api';
 import { toast } from 'react-toastify';
@@ -18,15 +18,21 @@ const Dashboard = () => {
     try {
       const response = await accountAPI.getUserAccounts(user.id);
       setAccounts(response.data);
-      if (response.data.length > 0 && !selectedAccount) {
-        setSelectedAccount(response.data[0]);
-      }
+
+      setSelectedAccount(prev => {
+        if (!prev && response.data.length > 0) return response.data[0];
+        if (prev) {
+          const updated = response.data.find(a => a.id === prev.id);
+          return updated || response.data[0] || null;
+        }
+        return null;
+      });
     } catch (error) {
       toast.error('Erreur lors du chargement des comptes');
     } finally {
       setLoading(false);
     }
-  }, [user, selectedAccount]); 
+  }, [user]);
 
   useEffect(() => {
     fetchAccounts();

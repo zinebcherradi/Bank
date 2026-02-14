@@ -35,7 +35,7 @@ export const accountAPI = {
     createAccount: (data) => api.post('/accounts/', data),
     deposit: (accountId, amount) => api.post(`/accounts/${accountId}/deposit?amount=${amount}`),
     withdraw: (accountId, amount) => api.post(`/accounts/${accountId}/withdraw?amount=${amount}`),
-    transfer: (fromId, toId, amount) => api.post(`/accounts/${fromId}/transfer?to_account_id=${toId}&amount=${amount}`),
+    transfer: (fromId, toNumber, amount) => api.post(`/accounts/${fromId}/transfer?to_account_number=${toNumber}&amount=${amount}`),
 };
 
 export const transactionAPI = {

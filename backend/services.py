@@ -5,6 +5,7 @@ from dto import UserRequest, AccountRequest
 from auth import get_password_hash, verify_password
 from typing import Optional, List
 from datetime import datetime
+from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
 class UserService:
@@ -80,11 +81,22 @@ class AuthService:
 
 
 class AccountService:
+    def _generate_account_number(self, session: Session) -> str:
+        import random
+        import string
+        while True:
+            # Generate a 10-digit random number
+            acc_num = ''.join(random.choices(string.digits, k=10))
+            if not AccountDao.get_by_account_number(session, acc_num):
+                return acc_num
+
     def create_account(self, account_request: AccountRequest) -> Optional[Account]:
         try:
             with LocalSession() as session:
+                acc_num = account_request.account_number or self._generate_account_number(session)
                 account = Account(
                     user_id=account_request.user_id,
+                    account_number=acc_num,
                     account_type=account_request.account_type,
                     balance=0.0,
                     overdraft_limit=account_request.overdraft_limit,
@@ -128,6 +140,7 @@ class AccountService:
                         description=f'Deposit of {amount}'
                     )
                     TransactionDao.create_transaction(session, transaction)
+                    session.commit()
                     return True
                 return False
         except SQLAlchemyError as e:
@@ -150,24 +163,27 @@ class AccountService:
                     transaction = Transaction(
                         account_id=account_id,
                         transaction_type='withdraw',
-                        amount=amount,
+                        amount=-amount,
                         description=f'Withdrawal of {amount}'
                     )
                     TransactionDao.create_transaction(session, transaction)
+                    session.commit()
                     return True
                 return False
         except SQLAlchemyError as e:
             print(f"Erreur retrait: {e}")
             return False
     
-    def transfer(self, from_account_id: int, to_account_id: int, amount: float) -> bool:
-        if amount <= 0 or from_account_id == to_account_id:
+    def transfer(self, from_account_id: int, to_account_number: str, amount: float) -> bool:
+        if amount <= 0:
             return False
         try:
             with LocalSession() as session:
                 from_account = AccountDao.get_by_id(session, from_account_id)
-                to_account = AccountDao.get_by_id(session, to_account_id)
+                to_account = AccountDao.get_by_account_number(session, to_account_number)
                 if not from_account or not to_account:
+                    return False
+                if from_account.id == to_account.id:
                     return False
                 max_withdrawal = from_account.balance + from_account.overdraft_limit
                 if amount > max_withdrawal:
@@ -178,13 +194,13 @@ class AccountService:
                     account_id=from_account_id,
                     transaction_type='transfer',
                     amount=-amount,
-                    description=f'Transfer to account {to_account_id}'
+                    description=f'Transfer to account {to_account.account_number}'
                 )
                 trans_to = Transaction(
-                    account_id=to_account_id,
+                    account_id=to_account.id,
                     transaction_type='transfer',
                     amount=amount,
-                    description=f'Transfer from account {from_account_id}'
+                    description=f'Transfer from account {from_account.account_number}'
                 )
                 session.add(trans_from)
                 session.add(trans_to)
