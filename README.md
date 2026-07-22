@@ -1,70 +1,134 @@
-# Getting Started with Create React App
+# SecureBank – Secure Banking Web Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+SecureBank est une application web bancaire Full Stack développée pour mettre en pratique les concepts de développement backend et frontend dans un contexte métier réaliste. L'application simule les principales fonctionnalités d'une banque en ligne, en mettant l'accent sur la sécurité, la gestion des comptes et le traitement des transactions.
 
-## Available Scripts
+Le projet a été conçu avec une architecture moderne reposant sur FastAPI pour le backend, React pour le frontend et MySQL pour la persistance des données.
 
-In the project directory, you can run:
+## Fonctionnalités
 
-### `npm start`
+### Authentification et sécurité
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Inscription et connexion des utilisateurs
+- Authentification basée sur JWT
+- Hachage sécurisé des mots de passe avec bcrypt
+- Gestion des sessions
+- Routes protégées
+- Contrôle d'accès garantissant que chaque utilisateur accède uniquement à ses propres données
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Gestion des comptes
 
-### `npm test`
+- Création de comptes bancaires
+- Consultation du solde
+- Gestion de plusieurs comptes par utilisateur
+- Validation des opérations
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Transactions bancaires
 
-### `npm run build`
+- Dépôts
+- Retraits
+- Virements entre comptes
+- Vérification des soldes disponibles
+- Gestion des découverts autorisés
+- Historique complet des transactions
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Tableau de bord
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Consultation des soldes en temps réel
+- Historique des opérations
+- Interface simple et intuitive
+- Réalisation des opérations financières depuis le tableau de bord
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Architecture du projet
 
-### `npm run eject`
+Le projet suit une architecture en couches favorisant la maintenabilité et la séparation des responsabilités :
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- Backend REST API avec FastAPI
+- Couche Services contenant la logique métier
+- Couche d'accès aux données avec SQLAlchemy
+- Base de données MySQL
+- Frontend React utilisant Context API pour la gestion de l'état
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Technologies utilisées
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Backend
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Python
+- FastAPI
+- SQLAlchemy
+- MySQL
+- JWT
+- bcrypt
+- Pydantic
+- Uvicorn
 
-## Learn More
+### Frontend
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- React
+- Context API
+- Axios
+- React Router
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Documentation
 
-### Code Splitting
+- Swagger UI
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Principales fonctionnalités techniques
 
-### Analyzing the Bundle Size
+- API REST sécurisée
+- Authentification JWT
+- Gestion des rôles et des autorisations
+- Validation des données
+- Gestion centralisée des erreurs
+- Transactions ACID
+- Architecture modulaire
+- Documentation automatique de l'API
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Ce que ce projet m'a permis d'approfondir
 
-### Making a Progressive Web App
+- Sécurisation d'une application web avec JWT et bcrypt
+- Gestion des variables d'environnement
+- Conception d'API REST avec FastAPI
+- Architecture logicielle en couches
+- Utilisation de SQLAlchemy et des transactions
+- Développement d'une interface React connectée à une API
+- Implémentation de la logique métier bancaire
+- Validation des données et gestion des exceptions
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Lancer le projet
 
-### Advanced Configuration
+### Backend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```bash
+cd backend
 
-### Deployment
+python -m venv venv
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+source venv/bin/activate      # Linux / macOS
+venv\Scripts\activate         # Windows
 
-### `npm run build` fails to minify
+pip install -r requirements.txt
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+uvicorn main:app --reload
+```
+
+### Frontend
+
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+## Documentation API
+
+Une fois le backend lancé, la documentation interactive est disponible via Swagger UI à l'adresse :
+
+```
+http://localhost:8000/docs
+```
+
+## Auteur
+
+Développé dans le cadre d'un projet d'apprentissage afin de mettre en pratique le développement Full Stack avec Python, FastAPI, React et MySQL en reproduisant les fonctionnalités essentielles d'une application bancaire sécurisée.
